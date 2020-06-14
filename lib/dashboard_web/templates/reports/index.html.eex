@@ -1,0 +1,3 @@
+<%= @user %>
+<div style="width: 1000px; height: 600px" id="page_views"></div>
+<div style="width: 1000px; height: 600px" id="link_clicks"></div>
