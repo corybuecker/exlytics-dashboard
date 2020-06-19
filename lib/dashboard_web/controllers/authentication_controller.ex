@@ -2,7 +2,9 @@ defmodule DashboardWeb.AuthenticationController do
   @moduledoc false
   use DashboardWeb, :controller
 
-  alias Dashboard.{User, Repo}
+  alias Assent.Strategy.Google
+  alias Dashboard.{Repo, User}
+
   require Logger
 
   def login(conn, _params) do
@@ -11,14 +13,13 @@ defmodule DashboardWeb.AuthenticationController do
 
   def authorize(conn, _params) do
     config = [
-      client_id: System.get_env("GOOGLE_CLIENT_ID"),
-      client_secret: System.get_env("GOOGLE_CLIENT_SECRET"),
+      client_id: Application.get_env(:dashboard, :google_client_id),
+      client_secret: Application.get_env(:dashboard, :google_client_secret),
       redirect_uri: Routes.authentication_url(conn, :callback),
       authorization_params: [scope: "openid profile email"]
     ]
 
-    {:ok, %{url: url, session_params: session_params}} =
-      Assent.Strategy.Google.authorize_url(config)
+    {:ok, %{url: url, session_params: session_params}} = Google.authorize_url(config)
 
     conn = put_session(conn, :session_params, session_params)
 
@@ -27,8 +28,8 @@ defmodule DashboardWeb.AuthenticationController do
 
   def callback(conn, params) do
     config = [
-      client_id: System.get_env("GOOGLE_CLIENT_ID"),
-      client_secret: System.get_env("GOOGLE_CLIENT_SECRET"),
+      client_id: Application.get_env(:dashboard, :google_client_id),
+      client_secret: Application.get_env(:dashboard, :google_client_secret),
       redirect_uri: Routes.authentication_url(conn, :callback),
       authorization_params: [scope: "openid profile email"]
     ]
@@ -36,7 +37,7 @@ defmodule DashboardWeb.AuthenticationController do
     {:ok, %{user: user}} =
       config
       |> Assent.Config.put(:session_params, get_session(conn, :session_params))
-      |> Assent.Strategy.Google.callback(params)
+      |> Google.callback(params)
 
     case user do
       %{"email_verified" => true, "email" => email, "sub" => openid} ->

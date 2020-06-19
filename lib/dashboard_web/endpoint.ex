@@ -7,7 +7,10 @@ defmodule DashboardWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_dashboard_key",
-    signing_salt: Application.get_env(:dashboard, :signing_salt)
+    signing_salt:
+      :crypto.strong_rand_bytes(64) |> Base.encode64(padding: false) |> binary_part(0, 64),
+    encryption_salt:
+      :crypto.strong_rand_bytes(64) |> Base.encode64(padding: false) |> binary_part(0, 64)
   ]
 
   socket "/socket", DashboardWeb.UserSocket,

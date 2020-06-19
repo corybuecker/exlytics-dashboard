@@ -1,4 +1,5 @@
 defmodule DashboardWeb.Plugs.RequireUser do
+  @moduledoc false
   import Plug.Conn
   alias DashboardWeb.Router.Helpers
   import Phoenix.Controller

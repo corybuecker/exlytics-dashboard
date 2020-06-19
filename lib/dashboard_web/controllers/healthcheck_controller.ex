@@ -1,8 +1,9 @@
 defmodule DashboardWeb.HealthcheckController do
   @moduledoc false
   use DashboardWeb, :controller
-  alias Ecto.Adapters.SQL
+
   alias Dashboard.Repo
+  alias Ecto.Adapters.SQL
 
   def index(conn, _params) do
     case SQL.query(Repo, "select 1", [], [{:log, false}]) do

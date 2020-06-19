@@ -1,5 +1,19 @@
 use Mix.Config
 
+# Configures the endpoint
+config :dashboard, DashboardWeb.Endpoint,
+  url: [host: "localhost"],
+  secret_key_base: :crypto.strong_rand_bytes(64) |> Base.url_encode64() |> binary_part(0, 64),
+  render_errors: [view: DashboardWeb.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_server: Dashboard.PubSub
+
+config :dashboard,
+  google_client_id: System.get_env("GOOGLE_CLIENT_ID"),
+  google_client_secret: System.get_env("GOOGLE_CLIENT_SECRET")
+
+config :dashboard, Dashboard.Repo,
+  url: "ecto://dashboard:dashboard@localhost:5432/exlytics?ssl=false"
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

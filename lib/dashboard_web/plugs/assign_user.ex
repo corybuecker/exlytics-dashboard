@@ -1,6 +1,7 @@
 defmodule DashboardWeb.Plugs.AssignUser do
+  @moduledoc false
   import Plug.Conn
-  alias Dashboard.{User, Repo}
+  alias Dashboard.{Repo, User}
 
   def init(_params) do
   end
@@ -8,16 +9,14 @@ defmodule DashboardWeb.Plugs.AssignUser do
   def call(conn, _params) do
     current_user_id = Plug.Conn.get_session(conn, :current_user_id)
 
-    cond do
-      current_user = current_user_id && Repo.get(User, current_user_id) ->
-        conn
-        |> assign(:current_user, current_user |> Repo.preload(:account))
-        |> assign(:user_signed_in?, true)
-
-      true ->
-        conn
-        |> assign(:current_user, nil)
-        |> assign(:user_signed_in?, false)
+    if current_user = current_user_id && Repo.get(User, current_user_id) do
+      conn
+      |> assign(:current_user, current_user |> Repo.preload(:account))
+      |> assign(:user_signed_in?, true)
+    else
+      conn
+      |> assign(:current_user, nil)
+      |> assign(:user_signed_in?, false)
     end
   end
 end

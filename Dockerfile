@@ -1,13 +1,32 @@
-FROM ubuntu:18.04
+FROM node:14-alpine as frontend-builder
 
-RUN apt-get update && \
-  apt-get install -y --no-install-recommends libssl1.0-dev && \
-  rm -rf /var/lib/apt/lists/*
+ENV MIX_HOME /dashboard
+COPY assets/package.json assets/package-lock.json $MIX_HOME/assets/
+WORKDIR $MIX_HOME/assets
 
-ARG release=_build/dev/rel/dashboard
-ENV MIX_HOME /home
+RUN npm install
+COPY assets $MIX_HOME/assets
+RUN npm run deploy
 
-WORKDIR /home
-COPY $release /home/
+FROM elixir:1.10.3-alpine AS backend-builder
+ARG mix_env=prod
 
-CMD ["/home/bin/dashboard", "start"]
+ENV MIX_HOME /dashboard
+ENV MIX_ENV $mix_env
+
+WORKDIR $MIX_HOME
+COPY mix.exs mix.lock $MIX_HOME/
+
+RUN mix local.hex --force
+RUN mix local.rebar --force
+RUN mix deps.get
+RUN mix deps.compile
+
+COPY . $MIX_HOME
+COPY --from=frontend-builder $MIX_HOME/priv/static $MIX_HOME/priv/static
+RUN mix release
+
+FROM elixir:1.10.3-alpine
+ARG release=/dashboard/_build/prod/rel/dashboard
+COPY --from=backend-builder $release /dashboard
+CMD ["/dashboard/bin/dashboard", "start"]
