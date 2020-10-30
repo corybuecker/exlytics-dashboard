@@ -1,0 +1,11 @@
+[package]
+name = "exlytics_dashboard"
+version = "0.1.0"
+authors = ["Cory Buecker <email@corybuecker.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rand = "0.7.3"
+actix-web = "3"
